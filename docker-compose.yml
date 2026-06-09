@@ -1,13 +1,35 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  api:
+  db:
+    image: postgres:15-alpine
+    container_name: postgres_db_lab4
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}$
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}$
+      POSTGRES_DB: ${POSTGRES_DB}$
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
     build: .
-    container_name: fastapi_app
+    container_name: fastapi_web_lab4
+    restart: always
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
-    env_file:
-      - .env
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      - .:/workspace
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}$
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}$
+      - POSTGRES_SERVER=${POSTGRES_SERVER}$
+      - POSTGRES_PORT=${POSTGRES_PORT}$
+      - POSTGRES_DB=${POSTGRES_DB}$
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
